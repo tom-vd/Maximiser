@@ -14,6 +14,8 @@ using namespace std;
 #include <typedefs>
 
 // Other headers
+#include "WindowActionA.h"
+#include "WindowActionW.h"
 #include "main.h"
 
 i32 _tmain(i32 argc,TCHAR* argv[]) {
@@ -22,13 +24,21 @@ i32 _tmain(i32 argc,TCHAR* argv[]) {
 	// call to EnumWindows.
 	SetConsoleTitle(TEXT("Maximiser"));
 	BOOL res;
-	if(argc == 2) {
-		tcout << "Going to maximise " << argv[1] << " windows..." << endl;
-		res = EnumWindows(&MaximiseWindowsWithTitle,(LPARAM) argv[1]);
-	} else {
-		tcout << "Going to maximise all windows..." << endl;
-		res = EnumWindows(&MaximiseCurrentWindow,0);
-	} // if
+	WindowAction wa;
+	wa.nCmdShow = SW_MAXIMIZE;
+	switch(argc) {
+		// TODO: Add "case 3" that can specify whether to maximise or minimise the windows
+		case 2:
+			wa.WindowText = argv[1];
+			tcout << "Going to maximise " << argv[1] << " windows..." << endl;
+			res = EnumWindows(&MaximiseWindowsWithTitle,(LPARAM) &wa);
+		break;
+		case 1:
+		default:
+			tcout << "Going to maximise all windows..." << endl;
+			res = EnumWindows(&PerformWindowAction,(LPARAM) &wa);
+		break;
+	} // switch
 	tcout << "EnumWindows result: " << res << endl;
 	tcout << "Press [ENTER] to exit... " << flush;
 	
@@ -78,13 +88,14 @@ BOOL CALLBACK MaximiseWindowsWithTitle(HWND hwnd,LPARAM lParam) {
 		return TRUE;
 	} // if
 
-	auto sTargetWindowTitle = (TCHAR*) lParam;
+	auto wa = (WindowAction*) lParam;
+	auto sTargetWindowTitle = wa->WindowText;
 	auto res = (LRESULT) msgres;
 	if(res) {
 		// Check whether the target window's title matches the title specified.
 		if(FindSubString(buffer,sTargetWindowTitle) > -1) {
 			tcout << "Found a " << sTargetWindowTitle << " window: " << buffer << endl;
-			MaximiseCurrentWindow(hwnd,0);
+			PerformWindowAction(hwnd,lParam);
 		} // if
 	} else {
 		LastError = GetLastError();
@@ -100,13 +111,16 @@ BOOL CALLBACK MaximiseWindowsWithTitle(HWND hwnd,LPARAM lParam) {
 /// <param name="lParam">Not used.</param>
 /// <returns>Always returns <c>TRUE</c>.</returns>
 /// </summary>
-BOOL CALLBACK MaximiseCurrentWindow(HWND hwnd,LPARAM lParam) {
+BOOL CALLBACK PerformWindowAction(HWND hwnd,LPARAM lParam) {
+	auto wa = (WindowAction*) lParam;
 	DWORD LastError = ERROR_SUCCESS;
-	ShowWindow(hwnd,SW_MAXIMIZE);
-	SetForegroundWindow(hwnd);
-	SetFocus(hwnd);
+	ShowWindow(hwnd,wa->nCmdShow);
+	if(wa->nCmdShow == SW_MAXIMIZE) {
+		SetForegroundWindow(hwnd);
+		SetFocus(hwnd);
+	} // if
 	return TRUE;
-} // MaximiseCurrentWindow(...)
+} // PerformWindowAction(...)
 
 ///	<summary>Finds a substring within a larger string.
 /// <param name="str1">Haystack; used to find <c>str2</c> in.</param>
