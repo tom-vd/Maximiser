@@ -21,6 +21,8 @@ using WindowAction = WindowActionW;
 using WindowAction = WindowActionA;
 #endif
 
+#define DEFAULT_SMTO_TIMEOUT (1000)
+
 i32 _tmain(i32 argc,TCHAR* argv[]);
 BOOL CALLBACK MaximiseWindowsWithTitle(HWND hwnd,LPARAM lParam);
 BOOL CALLBACK PerformWindowAction(HWND hwnd,LPARAM lParam);

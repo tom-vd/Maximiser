@@ -55,7 +55,7 @@ BOOL CALLBACK MaximiseWindowsWithTitle(HWND hwnd,LPARAM lParam) {
 	DWORD_PTR msgres = 0;
 	DWORD LastError = ERROR_SUCCESS;
 	// Try to obtain the target window's title length.
-	if(!SendMessageTimeout(hwnd,WM_GETTEXTLENGTH,0,0,SMTO_ABORTIFHUNG,10000,&msgres)) {
+	if(!SendMessageTimeout(hwnd,WM_GETTEXTLENGTH,0,0,SMTO_ABORTIFHUNG,DEFAULT_SMTO_TIMEOUT,&msgres)) {
 		LastError = GetLastError();
 		if(LastError == ERROR_TIMEOUT) tcout << "SendMessageTimeout failed: timeout" << endl;
 		else tcout << "SendMessageTimeout failed: " << LastError << endl;
@@ -109,7 +109,7 @@ BOOL CALLBACK MaximiseWindowsWithTitle(HWND hwnd,LPARAM lParam) {
 ///	<summary>Maximises the current window as received (either directly or indirectly) through <c>EnumWindows</c>.
 /// <param name="hwnd">Handle to the current window.</param>
 /// <param name="lParam">Not used.</param>
-/// <returns>Always returns <c>TRUE</c>.</returns>
+/// <returns>Always returns <c>TRUE</c> as specified by EnumWindowsProc.</returns>
 /// </summary>
 BOOL CALLBACK PerformWindowAction(HWND hwnd,LPARAM lParam) {
 	auto wa = (WindowAction*) lParam;
