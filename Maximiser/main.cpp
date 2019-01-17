@@ -3,6 +3,7 @@
 // C/C++ headers
 #include <iostream>
 #include <string>
+#include <map>
 #include <cstring>
 #include <cwchar>
 using namespace std;
@@ -12,6 +13,7 @@ using namespace std;
 
 // Library headers
 #include <typedefs>
+#include <DictionaryHelper.h>
 
 // Other headers
 #include "WindowActionA.h"
@@ -26,14 +28,27 @@ i32 _tmain(i32 argc,TCHAR* argv[]) {
 	BOOL res;
 	WindowAction wa;
 	wa.nCmdShow = SW_MAXIMIZE;
+	Dictionary args;
+	//args.insert(tstring("action"),tstring("maximise"));
+	args["action"] = TEXT("maximise");
+
 	switch(argc) {
 		// TODO: Add "case 3" that can specify whether to maximise or minimise the windows
-		case 2:
-			wa.WindowText = argv[1];
-			tcout << "Going to maximise " << argv[1] << " windows..." << endl;
-			res = EnumWindows(&MaximiseWindowsWithTitle,(LPARAM) &wa);
-		break;
-		case 1:
+		// nvm the above.
+		case 2: {
+			DictionaryHelper::ParseDictionary(argv[1],&args);
+
+			Dictionary::iterator it = args.find(tstring("title"));
+			if(it != args.end()) {
+				string title = it->second;
+				wa.WindowText = title.c_str();
+				tcout << "Going to maximise " << title << " windows..." << endl;
+				res = EnumWindows(&MaximiseWindowsWithTitle,(LPARAM) &wa);
+			} else {
+				tcout << "Going to maximise all windows..." << endl;
+				res = EnumWindows(&PerformWindowAction,(LPARAM) &wa);
+			} // if
+		} break;
 		default:
 			tcout << "Going to maximise all windows..." << endl;
 			res = EnumWindows(&PerformWindowAction,(LPARAM) &wa);

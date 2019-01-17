@@ -11,6 +11,7 @@
 #define tcin wcin
 #define _tmain wain
 using WindowAction = WindowActionW;
+using tstring = std::wstring;
 #else
 #define FindSubString FindSubStringA
 #define tcout cout
@@ -19,6 +20,7 @@ using WindowAction = WindowActionW;
 #define tcin cin
 #define _tmain main
 using WindowAction = WindowActionA;
+using tstring = std::string;
 #endif
 
 #define DEFAULT_SMTO_TIMEOUT (1000)
